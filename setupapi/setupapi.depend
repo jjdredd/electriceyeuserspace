@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1371046075 source:c:\documents and settings\admin\desktop\polezno\setupapi\main.cpp
+	<stdio.h>
+	<windows.h>
+	<setupapi.h>
+	<devguid.h>
+	<regstr.h>
+
+1382361984 source:c:\documents and settings\dd\desktop\setupapi\main.cpp
+	<stdio.h>
+	<windows.h>
+	<setupapi.h>
+	<devguid.h>
+	<regstr.h>
+	<ddk/cfgmgr32.h>
+
