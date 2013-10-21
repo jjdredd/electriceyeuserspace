@@ -5,10 +5,9 @@
 #include <regstr.h>
 #include <ddk/cfgmgr32.h>
 #define buffsz  800*600*3
-#define IOCTL_EEYE_INITFB CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_IN_DIRECT,
-FILE_ANY_ACCESS)
+#define IOCTL_EEYE_INITFB CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_IN_DIRECT,FILE_ANY_ACCESS)
 
-void GetFBInfo(int *a){
+int GetFBInfo(int *a){
   HDEVINFO hDevInfo;
   SP_DEVINFO_DATA DeviceInfoData;
   DWORD i;
@@ -81,8 +80,8 @@ void GetFBInfo(int *a){
   CM_Free_Log_Conf_Handle(plc0);
   SetupDiDestroyDeviceInfoList(hDevInfo);
   a[0] = FBPhysAddr;
-  a[1] = FBSz
-  return;
+  a[1] = FBSz;
+  return 0;
 }
 
 int main(){
@@ -106,9 +105,10 @@ int main(){
 
     GetFBInfo(payload);
 
+    printf("sending ioctl\n");
     DeviceIoControl(hFile, IOCTL_EEYE_INITFB, payload,
-		    2*sizeof(int), NULL, 0, NULL, NULL);
-
+		    2*sizeof(int), NULL, 0, &dwReturn, NULL);
+    printf("reading\n");
     ReadFile(hFile, buff, buffsz, &dwReturn, NULL);
     CloseHandle(hFile);
     /*
@@ -117,7 +117,7 @@ int main(){
         return -1;
     }
 */
-    fd = fopen("./out","wb+");
+    fd = fopen("./out.rgb","wb+");
     fwrite(buff, sizeof(char), buffsz, fd);
 
     fclose(fd);
