@@ -4,7 +4,7 @@
 #include <ddk/cfgmgr32.h>
 #define IOCTL_EEYE_INITFB CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_IN_DIRECT,FILE_ANY_ACCESS)
 
-int GetFBInfo(int *a){
+int GetFBInfo(long int *a){
   HDEVINFO hDevInfo;
   SP_DEVINFO_DATA DeviceInfoData;
   DWORD i;
@@ -14,7 +14,7 @@ int GetFBInfo(int *a){
   RES_DES rd, rd1;
   PMEM_RESOURCE  MemRes = 0;
   ULONG ResDataSize;
-  DWORD FBPhysAddr = 0, FBSz = 0;
+  long int FBPhysAddr = 0, FBSz = 0; 
   CONFIGRET cfgret;
 
   // Create a HDEVINFO with all present devices.
@@ -69,7 +69,7 @@ int GetFBInfo(int *a){
       rd = rd1;
     }
   }
-  printf("Best guess: FBPhysAddr = 0x%x\t FBSz = 0x%x\n", FBPhysAddr, FBSz);
+  printf("Best guess: FBPhysAddr = 0x%lx\t FBSz = 0x%lx\n", FBPhysAddr, FBSz);
   //printf("0x%x\n", cfgret);
   //  Cleanup
   LocalFree(MemRes);

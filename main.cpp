@@ -8,7 +8,8 @@ int main(){
     DWORD dwReturn = 0;
     char    *buff, *buff_rgb_conv;
     FILE    *fd;
-    int i, payload[2], w, h, d, buffsz, k;
+    int i, w, h, d, buffsz, k;
+    long int payload[2];
     HDC ScreenDC;
 
     if( !(ScreenDC = GetDC(NULL)) ){
@@ -37,7 +38,7 @@ int main(){
 
     printf("sending ioctl\n");
     DeviceIoControl(hFile, IOCTL_EEYE_INITFB, payload,
-		    2*sizeof(int), NULL, 0, &dwReturn, NULL);
+		    2*sizeof(long int), NULL, 0, &dwReturn, NULL);
     printf("reading\n");
     ReadFile(hFile, buff, buffsz, &dwReturn, NULL);
     CloseHandle(hFile);
