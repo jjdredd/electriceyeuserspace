@@ -3,8 +3,14 @@
 #include <regstr.h>
 #include <ddk/cfgmgr32.h>
 #define IOCTL_EEYE_INITFB CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_IN_DIRECT,FILE_ANY_ACCESS)
+typedef struct{
+  long int FBPhysAddr;
+  long int FBSz;
+  char begin[10];
+  char end[10];
+} PAYLOAD;
 
-int GetFBInfo(long int *a){
+int GetFBInfo(PAYLOAD *a){
   HDEVINFO hDevInfo;
   SP_DEVINFO_DATA DeviceInfoData;
   DWORD i;
@@ -14,7 +20,7 @@ int GetFBInfo(long int *a){
   RES_DES rd, rd1;
   PMEM_RESOURCE  MemRes = 0;
   ULONG ResDataSize;
-  long int FBPhysAddr = 0, FBSz = 0; 
+  long int FBPhysAddr = 0, FBSz = 0;
   CONFIGRET cfgret;
 
   // Create a HDEVINFO with all present devices.
@@ -76,7 +82,7 @@ int GetFBInfo(long int *a){
   CM_Free_Res_Des_Handle(rd1);
   CM_Free_Log_Conf_Handle(plc0);
   SetupDiDestroyDeviceInfoList(hDevInfo);
-  a[0] = FBPhysAddr;
-  a[1] = FBSz;
+  a->FBPhysAddr = FBPhysAddr;
+  a->FBSz = FBSz;
   return 0;
 }

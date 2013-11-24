@@ -6,11 +6,12 @@
 int main(){
     HANDLE hFile;
     DWORD dwReturn = 0;
-    char    *buff, *buff_rgb_conv;
+    char    *buff, *buff_rgb_conv, *chk_buff;
     FILE    *fd;
     int i, w, h, d, buffsz, k;
-    long int payload[2];
-    HDC ScreenDC;
+    PAYLOAD pl;
+    HDC ScreenDC, MemDC;
+    HBITMAP hbmp, hbmpold;
 
     if( !(ScreenDC = GetDC(NULL)) ){
       printf("couldn't get screendc\n");
@@ -19,9 +20,28 @@ int main(){
     w = GetDeviceCaps(ScreenDC, HORZRES);
     h = GetDeviceCaps(ScreenDC, VERTRES);
     d = GetDeviceCaps(ScreenDC, BITSPIXEL)/8;
-    ReleaseDC(NULL, ScreenDC);
     printf("%i\t%i\t%i\n", w, h, d);
     buffsz = w*h*d;
+    if( (chk_buff = (char *)malloc(buffsz)) == 0 ){
+        printf("Error allocating\n");
+        return -1;
+    }
+    MemDC = CreateCompatibleDC(ScreenDC);
+    hbmp = CreateCompatibleBitmap(ScreenDC, w, h);
+    hbmpold = (HBITMAP)SelectObject(MemDC, hbmp);
+    BitBlt(MemDC, 0, 0, w, h, ScreenDC, 0, 0, SRCCOPY);
+    hbmp = (HBITMAP)SelectObject(MemDC, hbmpold);
+    if( GetBitmapBits(hbmp, buffsz, chk_buff) != buffsz){
+      printf("Couldn't get bitmap bits\n");
+      return -1;
+    }
+    memcpy(pl.begin, chk_buff, 10);
+    memcpy(pl.end, chk_buff + buffsz - 10, 10);
+    DeleteObject(hbmp);
+    free(chk_buff);
+    ReleaseDC(NULL, ScreenDC);
+    DeleteDC(MemDC);
+
     if( (buff = (char *)malloc(buffsz)) == 0 ){
         printf("Error allocating\n");
         return -1;
@@ -34,11 +54,11 @@ int main(){
         return -1;
     }
 
-    GetFBInfo(payload);
+    GetFBInfo(&pl);
 
     printf("sending ioctl\n");
-    DeviceIoControl(hFile, IOCTL_EEYE_INITFB, payload,
-		    2*sizeof(long int), NULL, 0, &dwReturn, NULL);
+    DeviceIoControl(hFile, IOCTL_EEYE_INITFB, &pl,
+                    sizeof(PAYLOAD), NULL, 0, &dwReturn, NULL);
     printf("reading\n");
     ReadFile(hFile, buff, buffsz, &dwReturn, NULL);
     CloseHandle(hFile);
